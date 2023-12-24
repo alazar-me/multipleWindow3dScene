@@ -1,7 +1,7 @@
 # Multiple Window 3D Scene using Three.js
 
 ## Introduction
-This project demonstrates a unique approach to creating and managing a 3D scene across multiple browser windows using Three.js and localStorage. It's designed for developers interested in advanced web graphics and window management techniques.
+This project demonstrates a unique approach to creating and managing a 3D scene across multiple browser windows using Three.js and localStorage. It's designed for developers interested in advanced web graphics and window management techniques. in addition by implementing ray tracing method on the objects we can create 3d object using multiple windows tab. 
 
 ## Features
 - 3D scene creation and rendering with Three.js.
