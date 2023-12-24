@@ -127,7 +127,7 @@ else
 			let c = new t.Color();
 			c.setHSL(i * .1, 1.0, .5);
 
-			let s = 100 + i * 50;
+			let s = 60 + i * 50;
 			let cube = new t.Mesh(new t.BoxGeometry(s, s, s), new t.MeshBasicMaterial({color: c , wireframe: true}));
 			cube.position.x = win.shape.x + (win.shape.w * .5);
 			cube.position.y = win.shape.y + (win.shape.h * .5);
@@ -145,43 +145,59 @@ else
 	}
 
 
-	function render ()
-	{
-		let t = getTime();
+	
+function render() {
+    let currentTime = getTime();
+    let deltaTime = currentTime - internalTime;
+    internalTime = currentTime;
 
-		windowManager.update();
+    windowManager.update();
+
+    // Calculate the new position based on the delta between the current offset and new offset times a falloff value (to create the nice smoothing effect)
+    let falloff = 0.05;
+    sceneOffset.x = sceneOffset.x + ((sceneOffsetTarget.x - sceneOffset.x) * falloff);
+    sceneOffset.y = sceneOffset.y + ((sceneOffsetTarget.y - sceneOffset.y) * falloff);
+
+    // Set the world position to the offset
+    world.position.x = sceneOffset.x;
+    world.position.y = sceneOffset.y;
+
+    let wins = windowManager.getWindows();
+
+    // Loop through all our cubes and update their positions based on current window positions
+  // Loop through all our cubes and update their positions based on current window positions
+for (let i = 0; i < cubes.length; i++) {
+    let cube = cubes[i];
+    let win = wins[i];
+    let _t = currentTime + i * 0.2; // Use the current time for animation variation
+
+    let posTarget = { x: win.shape.x + (win.shape.w * 0.5), y: win.shape.y + (win.shape.h * 0.5) }
+
+    // Add tracking animation to cube position
+    let animationDuration = 1.0; // Adjust this value to control the speed of the tracking animation
+    cube.position.x += (posTarget.x - cube.position.x) * falloff * deltaTime * 60 / animationDuration;
+    cube.position.y += (posTarget.y - cube.position.y) * falloff * deltaTime * 60 / animationDuration;
+
+    // Add line connecting cubes
+    if (i > 0) {
+        let prevCube = cubes[i - 1];
+        let lineGeometry = new t.BufferGeometry().setFromPoints([prevCube.position, cube.position]);
+        let lineMaterial = new t.LineBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.5 });
+        let line = new t.Line(lineGeometry, lineMaterial);
+        world.add(line);
+    }
+    
+    cube.rotation.x = _t * 0.5;
+    cube.rotation.y = _t * 0.3;
+}
 
 
-		// calculate the new position based on the delta between current offset and new offset times a falloff value (to create the nice smoothing effect)
-		let falloff = .05;
-		sceneOffset.x = sceneOffset.x + ((sceneOffsetTarget.x - sceneOffset.x) * falloff);
-		sceneOffset.y = sceneOffset.y + ((sceneOffsetTarget.y - sceneOffset.y) * falloff);
+    // Render the scene
+    renderer.render(scene, camera);
 
-		// set the world position to the offset
-		world.position.x = sceneOffset.x;
-		world.position.y = sceneOffset.y;
-
-		let wins = windowManager.getWindows();
-
-
-		// loop through all our cubes and update their positions based on current window positions
-		for (let i = 0; i < cubes.length; i++)
-		{
-			let cube = cubes[i];
-			let win = wins[i];
-			let _t = t;// + i * .2;
-
-			let posTarget = {x: win.shape.x + (win.shape.w * .5), y: win.shape.y + (win.shape.h * .5)}
-
-			cube.position.x = cube.position.x + (posTarget.x - cube.position.x) * falloff;
-			cube.position.y = cube.position.y + (posTarget.y - cube.position.y) * falloff;
-			cube.rotation.x = _t * .5;
-			cube.rotation.y = _t * .3;
-		};
-
-		renderer.render(scene, camera);
-		requestAnimationFrame(render);
-	}
+    // Request the next animation frame
+    requestAnimationFrame(render);
+}
 
 
 	// resize the renderer to fit the window size
@@ -195,3 +211,5 @@ else
 		renderer.setSize( width, height );
 	}
 }
+
+
